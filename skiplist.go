@@ -141,6 +141,10 @@ func (s *skipList) Get(key []byte) (value []byte, err error) {
 	return
 }
 
+func (s *skipList) Num() int {
+	return s.n
+}
+
 func New() KVDB {
 	return &skipList{
 		rnd:       rand.New(rand.NewSource(0xabacabed)),

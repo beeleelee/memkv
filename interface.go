@@ -6,4 +6,5 @@ type KVDB interface {
 	// Contains(key []byte) bool
 	Get(key []byte) (value []byte, err error)
 	// Find(key []byte) (rkey, value []byte, err error)
+	Num() int
 }

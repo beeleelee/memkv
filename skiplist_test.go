@@ -6,6 +6,33 @@ import (
 	"testing"
 )
 
+func TestPutGetDelete(t *testing.T) {
+	keys := []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
+	values := []string{"golang", "leveldb", "postgres", "redis", "kubernets", "git", "docker", "ollama", "rag", "nginx"}
+	l := len(keys)
+	db := New()
+	for i := 0; i < l; i++ {
+		if err := db.Put([]byte(keys[i]), []byte(values[i])); err != nil {
+			log.Fatal(err)
+		}
+	}
+	for i := 0; i < l; i++ {
+		if rv, err := db.Get([]byte(keys[i])); err != nil {
+			log.Fatal(err)
+		} else if !bytes.Equal(rv, []byte(values[i])) {
+			log.Fatal("value not match", string(rv), values[i])
+		}
+	}
+	for i := 0; i < l; i++ {
+		if err := db.Delete([]byte(keys[i])); err != nil {
+			log.Fatal(err)
+		}
+	}
+	if db.Num() != 0 {
+		log.Fatal("incorrect number of keys")
+	}
+}
+
 func TestInitSkiplist(t *testing.T) {
 	_ = New()
 }
