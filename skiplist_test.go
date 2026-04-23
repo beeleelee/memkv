@@ -15,8 +15,13 @@ func TestPutGetDelete(t *testing.T) {
 	rand.Shuffle(l, func(i, j int) {
 		keys[i], keys[j] = keys[j], keys[i]
 	})
-	db := New()
-	fmt.Println(db.DumpKeys())
+	sl := &skipList{
+		rnd:       rand.New(rand.NewSource(0xabacabed)),
+		maxHeight: 1,
+	}
+	db := sl
+	sl.print()
+	//fmt.Println(db.DumpKeys())
 	for i := 0; i < l; i++ {
 		if err := db.Put([]byte(keys[i]), []byte(values[i])); err != nil {
 			log.Fatal(err)
@@ -33,6 +38,7 @@ func TestPutGetDelete(t *testing.T) {
 			log.Fatal("value not match", string(rv), values[i])
 		}
 	}
+	sl.print()
 	for i := 0; i < l; i++ {
 		if err := db.Delete([]byte(keys[i])); err != nil {
 			log.Fatal(err)

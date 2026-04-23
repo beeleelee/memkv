@@ -2,6 +2,7 @@ package memkv
 
 import (
 	"bytes"
+	"fmt"
 	"math/rand"
 	"sync"
 )
@@ -171,6 +172,23 @@ func (s *skipList) Dump() (keys [][]byte, values [][]byte) {
 		keys = append(keys, key)
 		values = append(values, value)
 		nd = nd.level[0]
+	}
+}
+
+func (s *skipList) print() {
+	h := s.maxHeight - 1
+	for ; h >= 0; h-- {
+		fmt.Printf("level %d head -> ", h)
+		node := s.heads[h]
+		for {
+			if node == nil {
+				fmt.Print(" nil")
+				break
+			}
+			fmt.Printf("%s, %s ->", node.k, node.v)
+			node = node.level[h]
+		}
+		fmt.Println()
 	}
 }
 
