@@ -9,8 +9,12 @@ import (
 )
 
 func TestPutGetDelete(t *testing.T) {
-	keys := []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
-	values := []string{"golang", "leveldb", "postgres", "redis", "kubernets", "git", "docker", "ollama", "rag", "nginx"}
+	var keys []string
+	values := []string{"golang", "leveldb", "postgres", "redis", "kubernets", "git", "docker", "ollama", "rag", "nginx", "mysql", "java", "rocm", "ubuntu", "npm", "ansible", "bitcoin", "xfs", "awk", "sed", "curl", "tmux", "tr", "tee", "df", "apt", "systemctl", "ssh", "less", "vim", "touch", "mv", "cd", "cp", "scp", "jump", "box", "kafka", "ln"}
+	keys = make([]string, len(values))
+	for i := range values {
+		keys[i] = fmt.Sprintf("%03d", i)
+	}
 	l := len(keys)
 	rand.Shuffle(l, func(i, j int) {
 		keys[i], keys[j] = keys[j], keys[i]

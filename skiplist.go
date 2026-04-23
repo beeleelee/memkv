@@ -185,7 +185,7 @@ func (s *skipList) print() {
 				fmt.Print(" nil")
 				break
 			}
-			fmt.Printf("%s, %s ->", node.k, node.v)
+			fmt.Printf("%s, %s -> ", node.k, node.v)
 			node = node.level[h]
 		}
 		fmt.Println()
