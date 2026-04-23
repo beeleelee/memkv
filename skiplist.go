@@ -145,6 +145,35 @@ func (s *skipList) Num() int {
 	return s.n
 }
 
+func (s *skipList) DumpKeys() (keys [][]byte) {
+	keys = make([][]byte, 0)
+	nd := s.heads[0]
+	for {
+		if nd == nil {
+			return
+		}
+		key := append([]byte{}, nd.k...)
+		keys = append(keys, key)
+		nd = nd.level[0]
+	}
+}
+
+func (s *skipList) Dump() (keys [][]byte, values [][]byte) {
+	keys = make([][]byte, 0)
+	values = make([][]byte, 0)
+	nd := s.heads[0]
+	for {
+		if nd == nil {
+			return
+		}
+		key := append([]byte{}, nd.k...)
+		value := append([]byte{}, nd.v...)
+		keys = append(keys, key)
+		values = append(values, value)
+		nd = nd.level[0]
+	}
+}
+
 func New() KVDB {
 	return &skipList{
 		rnd:       rand.New(rand.NewSource(0xabacabed)),

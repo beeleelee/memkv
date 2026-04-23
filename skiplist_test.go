@@ -2,7 +2,9 @@ package memkv
 
 import (
 	"bytes"
+	"fmt"
 	"log"
+	"math/rand"
 	"testing"
 )
 
@@ -10,11 +12,19 @@ func TestPutGetDelete(t *testing.T) {
 	keys := []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
 	values := []string{"golang", "leveldb", "postgres", "redis", "kubernets", "git", "docker", "ollama", "rag", "nginx"}
 	l := len(keys)
+	rand.Shuffle(l, func(i, j int) {
+		keys[i], keys[j] = keys[j], keys[i]
+	})
 	db := New()
+	fmt.Println(db.DumpKeys())
 	for i := 0; i < l; i++ {
 		if err := db.Put([]byte(keys[i]), []byte(values[i])); err != nil {
 			log.Fatal(err)
 		}
+	}
+	dks, dvs := db.Dump()
+	for i, k := range dks {
+		fmt.Println(string(k), string(dvs[i]))
 	}
 	for i := 0; i < l; i++ {
 		if rv, err := db.Get([]byte(keys[i])); err != nil {
