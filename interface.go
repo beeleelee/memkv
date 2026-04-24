@@ -7,6 +7,4 @@ type KVDB interface {
 	Get(key []byte) (value []byte, err error)
 	// Find(key []byte) (rkey, value []byte, err error)
 	Num() int
-	DumpKeys() [][]byte
-	Dump() ([][]byte, [][]byte)
 }

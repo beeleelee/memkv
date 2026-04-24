@@ -25,17 +25,11 @@ func TestPutGetDelete(t *testing.T) {
 	})
 	sl := newSkipList()
 	db := sl
-	// sl.print()
-	//fmt.Println(db.DumpKeys())
 	for i := 0; i < l; i++ {
 		if err := db.Put([]byte(keys[i]), []byte(values[i])); err != nil {
 			log.Fatal(err)
 		}
 	}
-	// dks, dvs := db.Dump()
-	// for i, k := range dks {
-	// 	fmt.Println(string(k), string(dvs[i]))
-	// }
 	for i := 0; i < l; i++ {
 		if rv, err := db.Get([]byte(keys[i])); err != nil {
 			log.Fatal(err)
@@ -43,7 +37,7 @@ func TestPutGetDelete(t *testing.T) {
 			log.Fatal("value not match", string(rv), values[i])
 		}
 	}
-	sl.print()
+	// sl.print()
 	for i := 0; i < l; i++ {
 		if err := db.Delete([]byte(keys[i])); err != nil {
 			log.Fatal(err)

@@ -146,7 +146,7 @@ func (s *skipList) Num() int {
 	return s.n
 }
 
-func (s *skipList) DumpKeys() (keys [][]byte) {
+func (s *skipList) dumpKeys() (keys [][]byte) {
 	keys = make([][]byte, 0)
 	nd := s.heads[0]
 	for {
@@ -159,7 +159,7 @@ func (s *skipList) DumpKeys() (keys [][]byte) {
 	}
 }
 
-func (s *skipList) Dump() (keys [][]byte, values [][]byte) {
+func (s *skipList) dump() (keys [][]byte, values [][]byte) {
 	keys = make([][]byte, 0)
 	values = make([][]byte, 0)
 	nd := s.heads[0]
