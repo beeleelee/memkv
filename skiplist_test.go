@@ -25,11 +25,19 @@ func TestPutGetDelete(t *testing.T) {
 	})
 	sl := newSkipList()
 	db := sl
+	// put empty value first
+	for i := 0; i < l; i++ {
+		if err := db.Put([]byte(keys[i]), nil); err != nil {
+			log.Fatal(err)
+		}
+	}
+	// sl.print()
 	for i := 0; i < l; i++ {
 		if err := db.Put([]byte(keys[i]), []byte(values[i])); err != nil {
 			log.Fatal(err)
 		}
 	}
+	//sl.print()
 	for i := 0; i < l; i++ {
 		if rv, err := db.Get([]byte(keys[i])); err != nil {
 			log.Fatal(err)
