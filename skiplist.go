@@ -192,10 +192,13 @@ func (s *skipList) print() {
 	}
 }
 
-func New() KVDB {
+func newSkipList() *skipList {
 	return &skipList{
-		rnd:       rand.New(rand.NewSource(0xabacabed)),
+		rnd:       rand.New(rand.NewSource(0xdeadbeaf)),
 		maxHeight: 1,
 	}
+}
 
+func New() KVDB {
+	return newSkipList()
 }

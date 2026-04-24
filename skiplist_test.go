@@ -10,7 +10,11 @@ import (
 
 func TestPutGetDelete(t *testing.T) {
 	var keys []string
-	values := []string{"golang", "leveldb", "postgres", "redis", "kubernets", "git", "docker", "ollama", "rag", "nginx", "mysql", "java", "rocm", "ubuntu", "npm", "ansible", "bitcoin", "xfs", "awk", "sed", "curl", "tmux", "tr", "tee", "df", "apt", "systemctl", "ssh", "less", "vim", "touch", "mv", "cd", "cp", "scp", "jump", "box", "kafka", "ln"}
+	vals := []string{"golang", "leveldb", "postgres", "redis", "kubernets", "git", "docker", "ollama", "rag", "nginx", "mysql", "java", "rocm", "ubuntu", "npm", "ansible", "bitcoin", "xfs", "awk", "sed", "curl", "tmux", "tr", "tee", "df", "apt", "systemctl", "ssh", "less", "vim", "touch", "mv", "cd", "cp", "scp", "jump", "box", "kafka", "ln", "cat", "tar", "which", "alias", "date", "echo", "cut", "ping", "uptime", "ps", "top"}
+	var values []string
+	for i := 0; i < 10; i++ {
+		values = append(values, vals...)
+	}
 	keys = make([]string, len(values))
 	for i := range values {
 		keys[i] = fmt.Sprintf("%03d", i)
@@ -19,22 +23,19 @@ func TestPutGetDelete(t *testing.T) {
 	rand.Shuffle(l, func(i, j int) {
 		keys[i], keys[j] = keys[j], keys[i]
 	})
-	sl := &skipList{
-		rnd:       rand.New(rand.NewSource(0xabacabed)),
-		maxHeight: 1,
-	}
+	sl := newSkipList()
 	db := sl
-	sl.print()
+	// sl.print()
 	//fmt.Println(db.DumpKeys())
 	for i := 0; i < l; i++ {
 		if err := db.Put([]byte(keys[i]), []byte(values[i])); err != nil {
 			log.Fatal(err)
 		}
 	}
-	dks, dvs := db.Dump()
-	for i, k := range dks {
-		fmt.Println(string(k), string(dvs[i]))
-	}
+	// dks, dvs := db.Dump()
+	// for i, k := range dks {
+	// 	fmt.Println(string(k), string(dvs[i]))
+	// }
 	for i := 0; i < l; i++ {
 		if rv, err := db.Get([]byte(keys[i])); err != nil {
 			log.Fatal(err)
