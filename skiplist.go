@@ -33,7 +33,7 @@ func (s *skipList) randHeight() (h int) {
 	return
 }
 
-func (s *skipList) findGE(key []byte, prev bool) (nd *node, exact bool) {
+func (s *skipList) findGE(key []byte, prev bool) (*node, bool) {
 	if prev {
 		// reset prevNode
 		for i := 0; i < s.maxHeight; i++ {
@@ -41,7 +41,7 @@ func (s *skipList) findGE(key []byte, prev bool) (nd *node, exact bool) {
 		}
 	}
 	h := s.maxHeight - 1
-	var next *node
+	var next, nd *node
 
 	for {
 		if nd != nil {
@@ -146,33 +146,25 @@ func (s *skipList) Num() int {
 	return s.n
 }
 
-func (s *skipList) dumpKeys() (keys [][]byte) {
-	keys = make([][]byte, 0)
-	nd := s.heads[0]
-	for {
-		if nd == nil {
-			return
-		}
-		key := append([]byte{}, nd.k...)
-		keys = append(keys, key)
-		nd = nd.level[0]
+func (s *skipList) Contains(key []byte) bool {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	if _, exact := s.findGE(key, false); exact {
+		return true
 	}
+	return false
 }
 
-func (s *skipList) dump() (keys [][]byte, values [][]byte) {
-	keys = make([][]byte, 0)
-	values = make([][]byte, 0)
-	nd := s.heads[0]
-	for {
-		if nd == nil {
-			return
-		}
-		key := append([]byte{}, nd.k...)
-		value := append([]byte{}, nd.v...)
-		keys = append(keys, key)
-		values = append(values, value)
-		nd = nd.level[0]
+func (s *skipList) Find(key []byte) (rkey, value []byte, err error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	if nd, _ := s.findGE(key, false); nd != nil {
+		rkey = append([]byte{}, nd.k...)
+		value = append([]byte{}, nd.v...)
+		return
 	}
+	err = ErrNotFound
+	return
 }
 
 func (s *skipList) print() {

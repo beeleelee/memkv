@@ -8,6 +8,36 @@ import (
 	"testing"
 )
 
+func TestContainsFind(t *testing.T) {
+	keys := []string{"drink", "sport", "season", "fruit", "vegetable", "city"}
+	vals := []string{"milk", "football", "winter", "apple", "lettuce", "shanghai"}
+	db := New()
+	for i, key := range keys {
+		if err := db.Put([]byte(key), []byte(vals[i])); err != nil {
+			log.Fatal(err)
+		}
+	}
+	if contains := db.Contains([]byte("culture")); contains {
+		log.Fatal("Should note contains key: culture")
+	}
+	for _, key := range keys {
+		if contains := db.Contains([]byte(key)); !contains {
+			log.Fatal("Should contains key: ", key)
+		}
+	}
+	if rk, v, err := db.Find([]byte("season")); err != nil || string(rk) != "season" || string(v) != "winter" {
+		log.Fatal("Should find key season")
+	}
+	if rk, v, err := db.Find([]byte("culture")); err != nil || string(rk) != "drink" || string(v) != "milk" {
+		log.Fatal("Should find key drink greater than culture")
+	}
+	if rk, v, err := db.Find([]byte("music")); err != nil || string(rk) != "season" || string(v) != "winter" {
+		log.Fatal("Should find key season greater than music")
+	}
+	if rk, v, err := db.Find([]byte("zoo")); err == nil || rk != nil || v != nil {
+		log.Fatal("Should not find key greater than zoo")
+	}
+}
 func TestPutGetDelete(t *testing.T) {
 	var keys []string
 	vals := []string{"golang", "leveldb", "postgres", "redis", "kubernets", "git", "docker", "ollama", "rag", "nginx", "mysql", "java", "rocm", "ubuntu", "npm", "ansible", "bitcoin", "xfs", "awk", "sed", "curl", "tmux", "tr", "tee", "df", "apt", "systemctl", "ssh", "less", "vim", "touch", "mv", "cd", "cp", "scp", "jump", "box", "kafka", "ln", "cat", "tar", "which", "alias", "date", "echo", "cut", "ping", "uptime", "ps", "top"}
