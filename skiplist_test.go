@@ -6,7 +6,6 @@ import (
 	"log"
 	"math/rand"
 	"testing"
-	"time"
 )
 
 func TestContainsFind(t *testing.T) {
@@ -95,21 +94,9 @@ func TestPutGet(t *testing.T) {
 	}
 }
 
-func BenchmarkPutGet(t *testing.B) {
-	st1 := time.Now()
-	db := New()
-	keys, values := genBenchmarkKeyValue(t.N)
-	st2 := time.Now()
-	dur1 := st2.Sub(st1)
-	fmt.Printf("key value prepared elapsed: %d, op %d, t.N %d\n", dur1.Nanoseconds(), dur1.Nanoseconds()/int64(t.N), t.N)
-	for i := 0; i < t.N; i++ {
-		if err := db.Put(keys[i], values[i]); err != nil {
-			t.Fatal(err)
-		}
-	}
-	st3 := time.Now()
-	dur2 := st3.Sub(st2)
-	fmt.Printf("put finished elaspsed: %d, op %d, t.N %d\n", dur2.Nanoseconds(), dur2.Nanoseconds()/int64(t.N), t.N)
+func BenchmarkGet(t *testing.B) {
+	db, keys, values := preBenchDB(t.N)
+	t.ResetTimer()
 	for i := 0; i < t.N; i++ {
 		v, err := db.Get(keys[i])
 		if err != nil {
@@ -118,9 +105,26 @@ func BenchmarkPutGet(t *testing.B) {
 			t.Fatal("key ", string(keys[i]), " not match, expect ", string(values[i]), " got ", string(v))
 		}
 	}
-	st4 := time.Now()
-	dur3 := st4.Sub(st3)
-	fmt.Printf("get finished elaspsed: %d, op %d, t.N %d\n", dur3.Nanoseconds(), dur3.Nanoseconds()/int64(t.N), t.N)
+}
+
+func BenchmarkPut(t *testing.B) {
+	db := New()
+	keys, values := genBenchmarkKeyValue(t.N)
+	t.ResetTimer()
+	for i := 0; i < t.N; i++ {
+		if err := db.Put(keys[i], values[i]); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
+func preBenchDB(n int) (KVDB, [][]byte, [][]byte) {
+	keys, values := genBenchmarkKeyValue(n)
+	db := New()
+	for i := 0; i < n; i++ {
+		db.Put(keys[i], values[i])
+	}
+	return db, keys, values
 }
 
 func genBenchmarkKeyValue(n int) ([][]byte, [][]byte) {
