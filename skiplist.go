@@ -1,7 +1,6 @@
 package memkv
 
 import (
-	"bytes"
 	"fmt"
 	"math/rand"
 	"sync"
@@ -10,8 +9,8 @@ import (
 const _max_height = 12
 
 type node struct {
-	k     []byte
-	v     []byte
+	k     any
+	v     any
 	level []*node
 }
 
@@ -22,6 +21,8 @@ type skipList struct {
 	heads     [_max_height]*node
 	maxHeight int
 	n         int
+	comfunc   CompareFunc
+	cpv       CopyValueFunc
 }
 
 func (s *skipList) randHeight() (h int) {
@@ -33,7 +34,7 @@ func (s *skipList) randHeight() (h int) {
 	return
 }
 
-func (s *skipList) findGE(key []byte, prev bool) (*node, bool) {
+func (s *skipList) findGE(key any, prev bool) (*node, bool) {
 	if prev {
 		// reset prevNode
 		for i := 0; i < s.maxHeight; i++ {
@@ -51,7 +52,7 @@ func (s *skipList) findGE(key []byte, prev bool) (*node, bool) {
 		}
 		cmp := 1
 		if next != nil {
-			cmp = bytes.Compare(next.k, key)
+			cmp = s.comfunc(next.k, key)
 		}
 		if cmp < 0 {
 			// keep searching in this list
@@ -71,12 +72,12 @@ func (s *skipList) findGE(key []byte, prev bool) (*node, bool) {
 
 }
 
-func (s *skipList) Put(key, value []byte) error {
+func (s *skipList) Put(key, value any) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	if nd, exact := s.findGE(key, true); exact {
-		nd.v = append(nd.v[:0], value...)
+		nd.v = s.cpv(value)
 		return nil
 	}
 
@@ -88,8 +89,8 @@ func (s *skipList) Put(key, value []byte) error {
 		s.maxHeight = h
 	}
 	nd := &node{
-		k:     append([]byte{}, key...),
-		v:     append([]byte{}, value...),
+		k:     key,
+		v:     s.cpv(value),
 		level: make([]*node, h),
 	}
 	for i, n := range s.prevNode[:h] {
@@ -109,7 +110,7 @@ func (s *skipList) Put(key, value []byte) error {
 
 }
 
-func (s *skipList) Delete(key []byte) error {
+func (s *skipList) Delete(key any) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -130,11 +131,11 @@ func (s *skipList) Delete(key []byte) error {
 	return nil
 }
 
-func (s *skipList) Get(key []byte) (value []byte, err error) {
+func (s *skipList) Get(key any) (value any, err error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	if nd, exact := s.findGE(key, false); exact {
-		value = append([]byte{}, nd.v...)
+		value = s.cpv(nd.v)
 	} else {
 		err = ErrNotFound
 	}
@@ -146,7 +147,7 @@ func (s *skipList) Num() int {
 	return s.n
 }
 
-func (s *skipList) Contains(key []byte) bool {
+func (s *skipList) Contains(key any) bool {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	if _, exact := s.findGE(key, false); exact {
@@ -155,12 +156,12 @@ func (s *skipList) Contains(key []byte) bool {
 	return false
 }
 
-func (s *skipList) Find(key []byte) (rkey, value []byte, err error) {
+func (s *skipList) Find(key any) (rkey, value any, err error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	if nd, _ := s.findGE(key, false); nd != nil {
-		rkey = append([]byte{}, nd.k...)
-		value = append([]byte{}, nd.v...)
+		rkey = nd.k
+		value = s.cpv(nd.v)
 		return
 	}
 	err = ErrNotFound
@@ -184,13 +185,15 @@ func (s *skipList) print() {
 	}
 }
 
-func newSkipList() *skipList {
+func newSkipList(cmpfunc CompareFunc, cpv CopyValueFunc) *skipList {
 	return &skipList{
 		rnd:       rand.New(rand.NewSource(0xdeadbeaf)),
 		maxHeight: 1,
+		comfunc:   cmpfunc,
+		cpv:       cpv,
 	}
 }
 
-func New() KVDB {
-	return newSkipList()
+func NewBytesKV() KVDB {
+	return newSkipList(BytesCompare, BytesClone)
 }

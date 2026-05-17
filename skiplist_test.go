@@ -11,7 +11,7 @@ import (
 func TestContainsFind(t *testing.T) {
 	keys := []string{"drink", "sport", "season", "fruit", "vegetable", "city"}
 	vals := []string{"milk", "football", "winter", "apple", "lettuce", "shanghai"}
-	db := New()
+	db := NewBytesKV()
 	for i, key := range keys {
 		if err := db.Put([]byte(key), []byte(vals[i])); err != nil {
 			log.Fatal(err)
@@ -25,13 +25,13 @@ func TestContainsFind(t *testing.T) {
 			log.Fatal("Should contains key: ", key)
 		}
 	}
-	if rk, v, err := db.Find([]byte("season")); err != nil || string(rk) != "season" || string(v) != "winter" {
+	if rk, v, err := db.Find([]byte("season")); err != nil || string(rk.([]byte)) != "season" || string(v.([]byte)) != "winter" {
 		log.Fatal("Should find key season")
 	}
-	if rk, v, err := db.Find([]byte("culture")); err != nil || string(rk) != "drink" || string(v) != "milk" {
+	if rk, v, err := db.Find([]byte("culture")); err != nil || string(rk.([]byte)) != "drink" || string(v.([]byte)) != "milk" {
 		log.Fatal("Should find key drink greater than culture")
 	}
-	if rk, v, err := db.Find([]byte("music")); err != nil || string(rk) != "season" || string(v) != "winter" {
+	if rk, v, err := db.Find([]byte("music")); err != nil || string(rk.([]byte)) != "season" || string(v.([]byte)) != "winter" {
 		log.Fatal("Should find key season greater than music")
 	}
 	if rk, v, err := db.Find([]byte("zoo")); err == nil || rk != nil || v != nil {
@@ -42,7 +42,7 @@ func TestPutGetDelete(t *testing.T) {
 	keys, values := genTestKeyValue()
 	l := len(keys)
 	var db KVDB
-	sl := newSkipList()
+	sl := newSkipList(BytesCompare, BytesClone)
 	db = sl
 	// put empty value first
 	for i := 0; i < l; i++ {
@@ -60,8 +60,8 @@ func TestPutGetDelete(t *testing.T) {
 	for i := 0; i < l; i++ {
 		if rv, err := db.Get([]byte(keys[i])); err != nil {
 			log.Fatal(err)
-		} else if !bytes.Equal(rv, []byte(values[i])) {
-			log.Fatal("value not match", string(rv), values[i])
+		} else if !bytes.Equal(rv.([]byte), []byte(values[i])) {
+			log.Fatal("value not match", string(rv.([]byte)), values[i])
 		}
 	}
 	// sl.print()
@@ -75,12 +75,8 @@ func TestPutGetDelete(t *testing.T) {
 	}
 }
 
-func TestInitSkiplist(t *testing.T) {
-	_ = New()
-}
-
 func TestPutGet(t *testing.T) {
-	db := New()
+	db := NewBytesKV()
 
 	k := []byte("test put_get key")
 	v := []byte("test put_get value")
@@ -89,7 +85,7 @@ func TestPutGet(t *testing.T) {
 	}
 	if rv, err := db.Get(k); err != nil {
 		log.Fatal(err)
-	} else if !bytes.Equal(v, rv) {
+	} else if !bytes.Equal(v, rv.([]byte)) {
 		log.Fatal("value not match", v, rv)
 	}
 }
@@ -101,14 +97,14 @@ func BenchmarkGet(t *testing.B) {
 		v, err := db.Get(keys[i])
 		if err != nil {
 			t.Fatal(err)
-		} else if !bytes.Equal(v, values[i]) {
-			t.Fatal("key ", string(keys[i]), " not match, expect ", string(values[i]), " got ", string(v))
+		} else if !bytes.Equal(v.([]byte), values[i]) {
+			t.Fatal("key ", string(keys[i]), " not match, expect ", string(values[i]), " got ", string(v.([]byte)))
 		}
 	}
 }
 
 func BenchmarkPut(t *testing.B) {
-	db := New()
+	db := NewBytesKV()
 	keys, values := genBenchmarkKeyValue(t.N)
 	t.ResetTimer()
 	for i := 0; i < t.N; i++ {
@@ -120,7 +116,7 @@ func BenchmarkPut(t *testing.B) {
 
 func preBenchDB(n int) (KVDB, [][]byte, [][]byte) {
 	keys, values := genBenchmarkKeyValue(n)
-	db := New()
+	db := NewBytesKV()
 	for i := 0; i < n; i++ {
 		db.Put(keys[i], values[i])
 	}
