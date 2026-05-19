@@ -22,6 +22,7 @@ type skipList struct {
 	maxHeight int
 	n         int
 	comfunc   CompareFunc
+	cpk       CopyKeyFunc
 	cpv       CopyValueFunc
 }
 
@@ -89,7 +90,7 @@ func (s *skipList) Put(key, value any) error {
 		s.maxHeight = h
 	}
 	nd := &node{
-		k:     key,
+		k:     s.cpk(key),
 		v:     s.cpv(value),
 		level: make([]*node, h),
 	}
@@ -161,7 +162,7 @@ func (s *skipList) Find(key any) (rkey, value any, err error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	if nd, _ := s.findGE(key, false); nd != nil {
-		rkey = nd.k
+		rkey = s.cpk(nd.k)
 		value = s.cpv(nd.v)
 		return
 	}
@@ -186,15 +187,16 @@ func (s *skipList) print() {
 	}
 }
 
-func newSkipList(cmpfunc CompareFunc, cpv CopyValueFunc) *skipList {
+func newSkipList(cmpfunc CompareFunc, cpk CopyKeyFunc, cpv CopyValueFunc) *skipList {
 	return &skipList{
 		rnd:       rand.New(rand.NewSource(0xdeadbeaf)),
 		maxHeight: 1,
 		comfunc:   cmpfunc,
+		cpk:       cpk,
 		cpv:       cpv,
 	}
 }
 
 func NewBytesKV() KVDB {
-	return newSkipList(BytesCompare, BytesClone)
+	return newSkipList(BytesCompare, BytesClone, BytesClone)
 }

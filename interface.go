@@ -13,6 +13,8 @@ type KVDB interface {
 
 type CompareFunc func(a, b any) int
 
+type CopyKeyFunc func(v any) any
+
 type CopyValueFunc func(v any) any
 
 func BytesCompare(a, b any) int {

@@ -42,7 +42,7 @@ func TestPutGetDelete(t *testing.T) {
 	keys, values := genTestKeyValue()
 	l := len(keys)
 	var db KVDB
-	sl := newSkipList(BytesCompare, BytesClone)
+	sl := newSkipList(BytesCompare, BytesClone, BytesClone)
 	db = sl
 	// put empty value first
 	for i := 0; i < l; i++ {
