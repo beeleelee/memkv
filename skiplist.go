@@ -144,6 +144,8 @@ func (s *skipList) Get(key any) (value any, err error) {
 }
 
 func (s *skipList) Num() int {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 	return s.n
 }
 
