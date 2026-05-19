@@ -119,8 +119,7 @@ func (s *skipList) Delete(key any) error {
 		return ErrNotFound
 	}
 
-	h := len(nd.level) - 1
-	for i, n := range s.prevNode[:h] {
+	for i, n := range s.prevNode[:len(nd.level)] {
 		if n != nil {
 			n.level[i] = nd.level[i]
 		} else {
